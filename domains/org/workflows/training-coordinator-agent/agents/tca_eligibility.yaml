@@ -1,0 +1,17 @@
+name: tca_eligibility
+version: 1.0.0
+description: Applies deterministic tenure and program rules and monitors status.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools:
+- lookup_governance_rules
+- sharepoint_roster_reader
+- compute_eligibility
+- compute_status
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

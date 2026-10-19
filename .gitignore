@@ -1,0 +1,13 @@
+.env
+.venv/
+.tools/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+*.pyc
+data/
+*.db
+.DS_Store
+dist/
+.adk/

@@ -1,0 +1,13 @@
+{
+  "aliases": {
+    "Alex": "alex@example.com",
+    "Jordan": "jordan@example.com",
+    "Riley": "riley@example.com",
+    "Sam": "sam@example.com"
+  },
+  "co_hosts": {
+    "GM-3": ["alex@example.com"],
+    "OEM-2": [],
+    "FOD-1": []
+  }
+}

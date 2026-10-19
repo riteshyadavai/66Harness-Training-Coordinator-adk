@@ -1,0 +1,45 @@
+version: "test-1"
+tools:
+  - id: sql_reader
+    name: sql_reader
+    kind: asset
+    category: core
+    label: SQL reader
+    pack: core
+    package_ref: enterprise_agent_sdk.assets:SqlReader
+    search_tags: [sql, core]
+    config_keys: [ASSETS_SQL_DB_URL]
+  - id: census
+    name: census
+    kind: asset
+    category: district_dine
+    label: Census DAG
+    pack: district_dine
+    package_ref: enterprise_agent_sdk.assets:CensusAsset
+    search_tags: [census, district_dine]
+    config_keys: [ASSETS_CENSUS_YEAR]
+  - id: osm
+    name: osm
+    kind: asset
+    category: district_dine
+    label: OSM DAG
+    pack: district_dine
+    package_ref: enterprise_agent_sdk.assets:OsmAsset
+    search_tags: [osm, district_dine]
+    config_keys: []
+mcp_servers:
+  - id: outlook
+    label: Outlook MCP
+    provider: camping_world
+    console_command: camping-outlook-mcp
+    transport: stdio
+    pip_extra: mcp-connectors
+    search_tags: [outlook, email]
+  - id: sharepoint
+    label: SharePoint MCP
+    provider: camping_world
+    console_command: camping-sp-search-mcp
+    transport: http
+    http_url: http://127.0.0.1:8080/mcp
+    pip_extra: mcp-connectors
+    search_tags: [sharepoint]

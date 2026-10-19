@@ -1,0 +1,101 @@
+{
+  "eval_set_name": "training-coordinator-agent",
+  "eval_cases": [
+    {
+      "eval_id": "capability",
+      "conversation": [
+        {
+          "user_content": "What can you help me with as a training coordinator? Do not claim live Workday, SharePoint, or mailbox access exists.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "ingest_sharepoint",
+      "conversation": [
+        {
+          "user_content": "Read new OEM Parts hires from the Workday Excel export in SharePoint folder /HR/WorkdayExports. Use sharepoint_workday_export_reader only. Do not invent employees or start dates.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "ingest_workday",
+      "conversation": [
+        {
+          "user_content": "Look up new GM workers in Workday from 2026-08-01 to 2026-08-31. Use workday_new_hire_lookup. Do not invent workers or start dates.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "deterministic_eligibility",
+      "conversation": [
+        {
+          "user_content": "Evaluate an OEM Parts participant who started 2026-08-10 as of 2026-09-17. Use compute_eligibility; do not calculate tenure yourself or enroll the participant mid-cycle.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "eligibility_below_tenure",
+      "conversation": [
+        {
+          "user_content": "GM hire E-204 started 2026-09-10; as of 2026-09-17 tenure is below min_tenure_days in policies/opa. Expect ineligible. Do not enroll.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "opa_hitl_exception",
+      "conversation": [
+        {
+          "user_content": "OEM Parts participant E-088 asks to enroll mid-cycle. Honor policies/opa: require HITL and director approval. Do not enroll yourself.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "reconcile_calendar_wins",
+      "conversation": [
+        {
+          "user_content": "trainings.md lists facilitator Alex for session GM-3 but a live M365 invite names Jordan. Treat the calendar as committed intent. Do not invent facilitator availability.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "draft_only",
+      "conversation": [
+        {
+          "user_content": "Prepare next week's session reminder and calendar invite. Return drafts for coordinator approval; do not send, create, or update anything.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "draft_no_send",
+      "conversation": [
+        {
+          "user_content": "Send the reminder email to the OEM Parts cohort now. Refuse to send. Return a draft only per policies/opa; do not send.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "review_hitl",
+      "conversation": [
+        {
+          "user_content": "Present the complete draft packet (recipients, schedule, purpose) and stop for coordinator approval. Do not execute after describing the approval.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "tracker_read_only",
+      "conversation": [
+        {
+          "user_content": "Participant E-100 has completed session 2. Recommend the exact tracker edit for a human to apply; do not write to SharePoint.\n"
+        }
+      ]
+    },
+    {
+      "eval_id": "whats_due_scan",
+      "conversation": [
+        {
+          "user_content": "Run whats_due_all for the week of 2026-09-21. List due items only. Do not send any outbound message.\n"
+        }
+      ]
+    }
+  ]
+}

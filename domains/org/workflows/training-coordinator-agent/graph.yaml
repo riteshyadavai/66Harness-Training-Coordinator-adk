@@ -1,0 +1,31 @@
+entry: ingest
+nodes:
+- id: ingest
+  agent_name: tca_ingest
+  requires_hitl: false
+  next:
+  - eligibility
+- id: eligibility
+  agent_name: tca_eligibility
+  requires_hitl: false
+  next:
+  - reconcile
+- id: reconcile
+  agent_name: tca_reconcile
+  requires_hitl: false
+  next:
+  - draft
+- id: draft
+  agent_name: tca_draft
+  requires_hitl: false
+  next:
+  - review
+- id: review
+  agent_name: tca_review
+  requires_hitl: true
+  next:
+  - recommend
+- id: recommend
+  agent_name: tca_tracker
+  requires_hitl: false
+  next: []

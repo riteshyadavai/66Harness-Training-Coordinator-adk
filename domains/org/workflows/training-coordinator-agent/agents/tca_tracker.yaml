@@ -1,0 +1,15 @@
+name: tca_tracker
+version: 1.0.0
+description: Produces exact read-only SharePoint tracker edit recommendations.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools:
+- sharepoint_roster_reader
+- recommend_tracker_edit
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

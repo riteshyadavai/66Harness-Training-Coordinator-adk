@@ -1,0 +1,21 @@
+name: tca_draft
+version: 1.0.0
+description: Prepares weekly operations and outbound action drafts.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools:
+- whats_due_all
+- draft_session_invite
+- reschedule_session_invite
+- cancel_session_invite
+- reassign_facilitator
+- draft_email
+- draft_teams_message
+- poll_facilitator_availability
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

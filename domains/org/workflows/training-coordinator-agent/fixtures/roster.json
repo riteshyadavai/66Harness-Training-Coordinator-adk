@@ -1,0 +1,79 @@
+{
+  "file_path": "/HR/Trackers/training_roster.xlsx",
+  "tabs": {
+    "OEM_Parts": [
+      {
+        "row": 4,
+        "employee_id": "E-088",
+        "name": "Casey Nguyen",
+        "program": "OEM_Parts",
+        "status": "hold_next_cycle",
+        "sessions_completed": 0,
+        "last_session": null,
+        "last_activity": "2026-07-15",
+        "exception": true,
+        "notes": "Requested mid-cycle enrollment"
+      },
+      {
+        "row": 5,
+        "employee_id": "E-100",
+        "name": "Morgan Lee",
+        "program": "OEM_Parts",
+        "status": "active",
+        "sessions_completed": 2,
+        "last_session": 2,
+        "last_activity": "2026-09-14",
+        "exception": false,
+        "notes": ""
+      },
+      {
+        "row": 6,
+        "employee_id": "E-141",
+        "name": "Priya Shah",
+        "program": "OEM_Parts",
+        "status": "active",
+        "sessions_completed": 1,
+        "last_session": 1,
+        "last_activity": "2026-08-28",
+        "exception": false,
+        "notes": "Reminder due for OEM-2"
+      }
+    ],
+    "GM": [
+      {
+        "row": 3,
+        "employee_id": "E-204",
+        "name": "Diego Alvarez",
+        "program": "GM",
+        "status": "pending_eligibility",
+        "sessions_completed": 0,
+        "last_session": null,
+        "last_activity": "2026-09-10",
+        "exception": false,
+        "notes": ""
+      }
+    ],
+    "FOD": [
+      {
+        "row": 2,
+        "employee_id": "E-310",
+        "name": "Jamie Cole",
+        "program": "FOD",
+        "status": "active",
+        "sessions_completed": 0,
+        "last_session": null,
+        "last_activity": "2026-08-20",
+        "exception": false,
+        "notes": "FOD-1 this week"
+      }
+    ]
+  },
+  "columns": {
+    "employee_id": "A",
+    "name": "B",
+    "status": "C",
+    "sessions_completed": "D",
+    "last_session": "E",
+    "notes": "F"
+  }
+}

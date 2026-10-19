@@ -1,0 +1,13 @@
+name: tca_review
+version: 1.0.0
+description: Holds all outbound drafts for explicit HR coordinator approval.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools: []
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

@@ -1,0 +1,14 @@
+name: tca_ingest
+version: 1.0.0
+description: Reads new-hire facts from the selected Workday or SharePoint connector.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools:
+- sharepoint_workday_export_reader
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

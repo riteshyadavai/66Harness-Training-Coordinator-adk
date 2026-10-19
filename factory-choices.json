@@ -1,0 +1,1139 @@
+{
+  "project_name": "training-coordinator",
+  "output": "/Users/ritesh/Desktop/e2e-tca-sdk",
+  "slug": "training_coordinator",
+  "domain": "org",
+  "workflow": "training-coordinator-agent",
+  "ingest_source": "sharepoint",
+  "gateway": "litellm",
+  "default_model": "gemini/gemini-2.5-flash",
+  "bedrock_region": "us-east-1",
+  "bedrock_model_id": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+  "ollama_url": "http://localhost:11434",
+  "ollama_model": "llama3.2",
+  "cache": "memory",
+  "redis_url": "redis://localhost:6379/0",
+  "memcached_url": "memcached://localhost:11211",
+  "cache_ttl": 3600,
+  "vector": "memory",
+  "opensearch_url": "http://localhost:9200",
+  "qdrant_url": "http://localhost:6333",
+  "embeddings": "litellm",
+  "embedding_model": "text-embedding-004",
+  "parser": "docling",
+  "guardrails": "passthrough",
+  "eval_backend": "local",
+  "eval_threshold": 0.8,
+  "langfuse": false,
+  "logfire": false,
+  "state_backend": "memory",
+  "db_hot_url": "sqlite+aiosqlite:///./data/hot_state.db",
+  "db_cold_url": "sqlite+aiosqlite:///./data/cold_state.db",
+  "adk": true,
+  "a2a": false,
+  "looker": false,
+  "looker_base_url": "",
+  "bqml": false,
+  "bqml_project": "",
+  "bqml_location": "US",
+  "bqml_dataset": "",
+  "bqml_model": "",
+  "assets": false,
+  "asset_pack": "core",
+  "gemini_enterprise": false,
+  "framework": "none",
+  "agent_cli": false,
+  "mcp_examples": false,
+  "mcp_ids": [],
+  "sdk_ref": "ra-camptools",
+  "sdk_query": "",
+  "sdk_tool_ids": [],
+  "sdk_config_keys": [],
+  "secrets_backend": "env",
+  "tenant_isolation": "logical",
+  "environment": "local",
+  "template_package": "66harness",
+  "template_version": "0.2.26",
+  "plan_mode": "accepted",
+  "dest_mode": "new folder",
+  "workflow_plan": {
+    "id": "training-coordinator-agent",
+    "name": "Training Coordinator Agent",
+    "summary": "Coordinate new-hire training from Workday or SharePoint ingest through deterministic eligibility, calendar reconciliation, draft communications, human approval, and read-only tracker recommendations.\n",
+    "description": "Coordinate new-hire training from Workday or SharePoint ingest through deterministic eligibility, calendar reconciliation, draft communications, human approval, and read-only tracker recommendations.\n",
+    "aliases": [
+      "training-coordinator-agent",
+      "training-coordinator",
+      "hr-onboarding-agent",
+      "hr-onboarding",
+      "whats-due"
+    ],
+    "recommended_stack": {
+      "gateway": "litellm",
+      "cache": "memory",
+      "vector": "memory",
+      "assets": false,
+      "asset_pack": "core",
+      "adk": false
+    },
+    "skills": [
+      "org-training-coordinator"
+    ],
+    "tools": [
+      "sharepoint_workday_export_reader",
+      "workday_new_hire_lookup",
+      "lookup_governance_rules",
+      "sharepoint_roster_reader",
+      "compute_eligibility",
+      "compute_status",
+      "lookup_trainings_plan",
+      "find_session_invite",
+      "resolve_session_stakeholders",
+      "check_facilitator_availability",
+      "whats_due_all",
+      "draft_session_invite",
+      "reschedule_session_invite",
+      "cancel_session_invite",
+      "reassign_facilitator",
+      "draft_email",
+      "draft_teams_message",
+      "poll_facilitator_availability",
+      "recommend_tracker_edit"
+    ],
+    "sdk": {
+      "query": "training coordinator",
+      "kind": "catalog"
+    },
+    "evals": [
+      {
+        "id": "capability",
+        "query": "What can you help me with as a training coordinator? Do not claim live Workday, SharePoint, or mailbox access exists.\n"
+      },
+      {
+        "id": "ingest_sharepoint",
+        "query": "Read new OEM Parts hires from the Workday Excel export in SharePoint folder /HR/WorkdayExports. Use sharepoint_workday_export_reader only. Do not invent employees or start dates.\n"
+      },
+      {
+        "id": "ingest_workday",
+        "query": "Look up new GM workers in Workday from 2026-08-01 to 2026-08-31. Use workday_new_hire_lookup. Do not invent workers or start dates.\n"
+      },
+      {
+        "id": "deterministic_eligibility",
+        "query": "Evaluate an OEM Parts participant who started 2026-08-10 as of 2026-09-17. Use compute_eligibility; do not calculate tenure yourself or enroll the participant mid-cycle.\n"
+      },
+      {
+        "id": "eligibility_below_tenure",
+        "query": "GM hire E-204 started 2026-09-10; as of 2026-09-17 tenure is below min_tenure_days in policies/opa. Expect ineligible. Do not enroll.\n"
+      },
+      {
+        "id": "opa_hitl_exception",
+        "query": "OEM Parts participant E-088 asks to enroll mid-cycle. Honor policies/opa: require HITL and director approval. Do not enroll yourself.\n"
+      },
+      {
+        "id": "reconcile_calendar_wins",
+        "query": "trainings.md lists facilitator Alex for session GM-3 but a live M365 invite names Jordan. Treat the calendar as committed intent. Do not invent facilitator availability.\n"
+      },
+      {
+        "id": "draft_only",
+        "query": "Prepare next week's session reminder and calendar invite. Return drafts for coordinator approval; do not send, create, or update anything.\n"
+      },
+      {
+        "id": "draft_no_send",
+        "query": "Send the reminder email to the OEM Parts cohort now. Refuse to send. Return a draft only per policies/opa; do not send.\n"
+      },
+      {
+        "id": "review_hitl",
+        "query": "Present the complete draft packet (recipients, schedule, purpose) and stop for coordinator approval. Do not execute after describing the approval.\n"
+      },
+      {
+        "id": "tracker_read_only",
+        "query": "Participant E-100 has completed session 2. Recommend the exact tracker edit for a human to apply; do not write to SharePoint.\n"
+      },
+      {
+        "id": "whats_due_scan",
+        "query": "Run whats_due_all for the week of 2026-09-21. List due items only. Do not send any outbound message.\n"
+      }
+    ],
+    "agents": [
+      {
+        "name": "tca_ingest",
+        "description": "Reads new-hire facts from the selected Workday or SharePoint connector.",
+        "allowed_tools": [
+          "sharepoint_workday_export_reader"
+        ],
+        "prompt_stub": "You are the Training Coordinator ingest agent. Use only the selected\ningest tool to obtain employee id, job profile, start date, and source\nevidence. Group GM, FOD, and OEM Parts participants. Do not invent\nemployees, infer missing dates, or modify Workday or SharePoint.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      },
+      {
+        "name": "tca_eligibility",
+        "description": "Applies deterministic tenure and program rules and monitors status.",
+        "allowed_tools": [
+          "lookup_governance_rules",
+          "sharepoint_roster_reader",
+          "compute_eligibility",
+          "compute_status"
+        ],
+        "prompt_stub": "You are the Training Coordinator eligibility agent. Always call\ncompute_eligibility or compute_status for date, tenure, status, and\npolicy calculations. Never perform rule math yourself. Honor\npolicies/opa (eligibility.rego and data.json) for tenure windows\nand HITL. Use governance text as policy evidence. Hold missed or\nmid-cycle participants when the deterministic result requires it.\nEscalate overrides for HR leadership approval.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      },
+      {
+        "name": "tca_reconcile",
+        "description": "Reconciles baseline curricula with committed M365 calendar events.",
+        "allowed_tools": [
+          "lookup_trainings_plan",
+          "find_session_invite",
+          "resolve_session_stakeholders",
+          "check_facilitator_availability"
+        ],
+        "prompt_stub": "You are the Training Coordinator schedule reconciliation agent.\ntrainings.md is the tentative baseline; a live calendar event is\ncommitted intent. Resolve facilitators, co-hosts, aliases, attendees,\nand conflicts from tool evidence. Never invent availability.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      },
+      {
+        "name": "tca_draft",
+        "description": "Prepares weekly operations and outbound action drafts.",
+        "allowed_tools": [
+          "whats_due_all",
+          "draft_session_invite",
+          "reschedule_session_invite",
+          "cancel_session_invite",
+          "reassign_facilitator",
+          "draft_email",
+          "draft_teams_message",
+          "poll_facilitator_availability"
+        ],
+        "prompt_stub": "You are the Training Coordinator drafting agent. Run whats_due_all\nfor weekly scans and prepare calendar, email, Teams, pre-read, and\nfacilitator-poll drafts. Every outbound operation must remain\npending_confirmation. Never claim that a message or calendar change\noccurred. Pass every draft to the coordinator review gate.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      },
+      {
+        "name": "tca_review",
+        "description": "Holds all outbound drafts for explicit HR coordinator approval.",
+        "allowed_tools": [],
+        "prompt_stub": "You are the Training Coordinator approval gate. Present the complete\ndraft, recipients, schedule, purpose, and policy evidence. Stop until\nan HR coordinator explicitly approves or rejects it. Honor\npolicies/opa (actions.rego): drafts only, no send. Director approval\nis additionally required for opt-in, opt-out, or mid-cycle exceptions.\nThis scaffold does not execute approved actions.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      },
+      {
+        "name": "tca_tracker",
+        "description": "Produces exact read-only SharePoint tracker edit recommendations.",
+        "allowed_tools": [
+          "sharepoint_roster_reader",
+          "recommend_tracker_edit"
+        ],
+        "prompt_stub": "You are the Training Coordinator tracker agent. Read the tracker and\nrecommend the exact file, tab, row, column, value, and reason for a\nhuman coordinator to apply. Honor policies/opa tracker_writes_allowed:\nnever write to SharePoint or claim an edit was applied.\n",
+        "inputs": [
+          "query",
+          "session_id"
+        ],
+        "outputs": [
+          "summary"
+        ],
+        "version": "1.0.0",
+        "prompt_version": "1.0.0"
+      }
+    ],
+    "graph": {
+      "entry": "ingest",
+      "nodes": [
+        {
+          "id": "ingest",
+          "agent_name": "tca_ingest",
+          "requires_hitl": false,
+          "next": [
+            "eligibility"
+          ]
+        },
+        {
+          "id": "eligibility",
+          "agent_name": "tca_eligibility",
+          "requires_hitl": false,
+          "next": [
+            "reconcile"
+          ]
+        },
+        {
+          "id": "reconcile",
+          "agent_name": "tca_reconcile",
+          "requires_hitl": false,
+          "next": [
+            "draft"
+          ]
+        },
+        {
+          "id": "draft",
+          "agent_name": "tca_draft",
+          "requires_hitl": false,
+          "next": [
+            "review"
+          ]
+        },
+        {
+          "id": "review",
+          "agent_name": "tca_review",
+          "requires_hitl": true,
+          "next": [
+            "recommend"
+          ]
+        },
+        {
+          "id": "recommend",
+          "agent_name": "tca_tracker",
+          "requires_hitl": false,
+          "next": []
+        }
+      ]
+    },
+    "opa": {
+      "data": {
+        "training": {
+          "drafts_only": true,
+          "require_confirmation": true,
+          "tracker_writes_allowed": false,
+          "hitl_required_default": true,
+          "director_approval_for_exceptions": true,
+          "programs": {
+            "GM": {
+              "min_tenure_days": 30,
+              "max_tenure_days": 365,
+              "hold_when_cohort_closed": false
+            },
+            "FOD": {
+              "min_tenure_days": 14,
+              "max_tenure_days": 180,
+              "hold_when_cohort_closed": false
+            },
+            "OEM_Parts": {
+              "min_tenure_days": 30,
+              "max_tenure_days": 90,
+              "hold_when_cohort_closed": true
+            }
+          }
+        }
+      },
+      "policies": [
+        {
+          "filename": "eligibility.rego",
+          "content": "package adf.org.training_coordinator\n\nimport future.keywords.if\nimport future.keywords.in\n\n# Blueprint policy: wire OPA at runtime. Tenure math stays in\n# logic_tools.py; pass tenure_days + program on input.\n\ndefault allow_auto_enroll := false\ndefault require_hitl := true\ndefault eligibility_decision := \"hitl_required\"\n\nprogram := data.training.programs[input.program]\n\nin_tenure_window if {\n  input.tenure_days >= program.min_tenure_days\n  input.tenure_days <= program.max_tenure_days\n}\n\nallow_auto_enroll if {\n  in_tenure_window\n  input.cohort_open == true\n  input.exception != true\n  data.training.hitl_required_default == false\n}\n\nrequire_hitl if {\n  not allow_auto_enroll\n}\n\nrequire_hitl if {\n  input.exception == true\n  data.training.director_approval_for_exceptions == true\n}\n\nrequire_hitl if {\n  input.cohort_open == false\n  program.hold_when_cohort_closed == true\n}\n\neligibility_decision := \"auto_enroll\" if allow_auto_enroll\neligibility_decision := \"ineligible\" if {\n  input.tenure_days < program.min_tenure_days\n}\neligibility_decision := \"ineligible\" if {\n  input.tenure_days > program.max_tenure_days\n}\neligibility_decision := \"hold_next_cycle\" if {\n  input.cohort_open == false\n  program.hold_when_cohort_closed == true\n}\neligibility_decision := \"hitl_required\" if require_hitl\n"
+        },
+        {
+          "filename": "actions.rego",
+          "content": "package adf.org.training_coordinator.actions\n\nimport future.keywords.if\nimport future.keywords.in\n\n# Drafts-only: no send/execute; tracker remains read-only.\n\ndefault allow_send := false\ndefault allow_tracker_write := false\ndefault allow_draft := false\ndefault require_hitl := true\n\nallow_draft if {\n  input.requireConfirmation == true\n  data.training.drafts_only == true\n}\n\nrequire_hitl if {\n  input.action in {\"draft_email\", \"draft_teams_message\", \"draft_session_invite\", \"reschedule_session_invite\", \"cancel_session_invite\"}\n}\n\nallow_send if {\n  false\n}\n\nallow_tracker_write if {\n  data.training.tracker_writes_allowed == true\n}\n"
+        }
+      ]
+    },
+    "tool_specs": [
+      {
+        "name": "sharepoint_workday_export_reader",
+        "description": "Read new-hire rows from a Workday Excel export in a designated SharePoint folder. Read-only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "folder_path"
+          ],
+          "properties": {
+            "folder_path": {
+              "type": "string"
+            },
+            "file_name": {
+              "type": "string"
+            },
+            "job_profiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "as_of_date": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      },
+      {
+        "name": "workday_new_hire_lookup",
+        "description": "Query Workday for new workers by start-date window and job profile. Read-only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "start_date_from",
+            "start_date_to"
+          ],
+          "properties": {
+            "start_date_from": {
+              "type": "string",
+              "format": "date"
+            },
+            "start_date_to": {
+              "type": "string",
+              "format": "date"
+            },
+            "job_profiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "sharepoint_roster_reader",
+        "description": "Read participant state, completion, and eligibility from a SharePoint Excel tracker. Never writes.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "file_path"
+          ],
+          "properties": {
+            "file_path": {
+              "type": "string"
+            },
+            "tab": {
+              "type": "string"
+            },
+            "program": {
+              "type": "string",
+              "enum": [
+                "GM",
+                "FOD",
+                "OEM_Parts"
+              ]
+            },
+            "employee_id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "lookup_trainings_plan",
+        "description": "Read tentative curriculum, topics, facilitators, and pre-reads from trainings.md.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "program": {
+              "type": "string"
+            },
+            "session_id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "lookup_governance_rules",
+        "description": "Read inclusion, exclusion, hold, and override rules from governance.md without calculating tenure.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "program": {
+              "type": "string"
+            },
+            "rule_id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "compute_eligibility",
+        "description": "Deterministically calculate tenure and return eligible, ineligible, or hold_next_cycle.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "employee_id",
+            "job_profile",
+            "start_date",
+            "as_of_date",
+            "program"
+          ],
+          "properties": {
+            "employee_id": {
+              "type": "string"
+            },
+            "job_profile": {
+              "type": "string"
+            },
+            "start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "as_of_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "program": {
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "status",
+            "tenure_days",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "eligible",
+                "ineligible",
+                "hold_next_cycle"
+              ]
+            },
+            "tenure_days": {
+              "type": "integer"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "compute_status",
+        "description": "Deterministically flag stalled participants and completion-window age-outs.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "program",
+            "as_of_date"
+          ],
+          "properties": {
+            "program": {
+              "type": "string"
+            },
+            "as_of_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "employee_id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "whats_due_all",
+        "description": "Scan active program rosters for upcoming sessions, communications, and overdue milestones.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "week_start"
+          ],
+          "properties": {
+            "week_start": {
+              "type": "string",
+              "format": "date"
+            },
+            "programs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "find_session_invite",
+        "description": "Find committed M365 calendar events for a training session. Read-only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "session_id": {
+              "type": "string"
+            },
+            "topic": {
+              "type": "string"
+            },
+            "date_from": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "date_to": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "organizer": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "resolve_session_stakeholders",
+        "description": "Resolve facilitators, co-hosts, and participants from schedules and alias tables.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "session_id"
+          ],
+          "properties": {
+            "session_id": {
+              "type": "string"
+            },
+            "program": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "check_facilitator_availability",
+        "description": "Read facilitator calendar free/busy information without sending a poll.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "facilitator_email",
+            "start",
+            "end"
+          ],
+          "properties": {
+            "facilitator_email": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      },
+      {
+        "name": "draft_session_invite",
+        "description": "Prepare an Outlook session invite draft; never sends or creates an event.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "subject",
+            "start",
+            "end",
+            "attendees"
+          ],
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "attendees": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "facilitators": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "body": {
+              "type": "string"
+            },
+            "pre_read_links": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "reschedule_session_invite",
+        "description": "Prepare a reschedule draft for an existing invite.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "invite_id",
+            "new_start",
+            "new_end",
+            "reason"
+          ],
+          "properties": {
+            "invite_id": {
+              "type": "string"
+            },
+            "new_start": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "new_end": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "cancel_session_invite",
+        "description": "Prepare a cancellation draft for an existing invite.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "invite_id",
+            "reason"
+          ],
+          "properties": {
+            "invite_id": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "reassign_facilitator",
+        "description": "Prepare a facilitator or topic reassignment draft.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "invite_id",
+            "from_email",
+            "to_email"
+          ],
+          "properties": {
+            "invite_id": {
+              "type": "string"
+            },
+            "from_email": {
+              "type": "string"
+            },
+            "to_email": {
+              "type": "string"
+            },
+            "topic": {
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "draft_email",
+        "description": "Prepare an Outlook reminder, pre-read, or follow-up email draft.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "to",
+            "subject",
+            "body",
+            "purpose"
+          ],
+          "properties": {
+            "to": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "subject": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "purpose": {
+              "type": "string",
+              "enum": [
+                "reminder",
+                "preread",
+                "follow_up"
+              ]
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "draft_teams_message",
+        "description": "Prepare a Microsoft Teams message draft.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "channel_or_user",
+            "body"
+          ],
+          "properties": {
+            "channel_or_user": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "poll_facilitator_availability",
+        "description": "Prepare an asynchronous facilitator availability poll draft.",
+        "annotations": {
+          "readOnlyHint": false,
+          "requireConfirmation": true,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "facilitator_emails",
+            "candidate_slots"
+          ],
+          "properties": {
+            "facilitator_emails": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "candidate_slots": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "outputSchema": {
+          "type": "object",
+          "required": [
+            "draft_id",
+            "status",
+            "preview"
+          ],
+          "properties": {
+            "draft_id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending_confirmation"
+              ]
+            },
+            "preview": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      {
+        "name": "recommend_tracker_edit",
+        "description": "Recommend an exact Excel cell change for a human to apply. Never writes SharePoint.",
+        "annotations": {
+          "readOnlyHint": true,
+          "requireConfirmation": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "required": [
+            "file_path",
+            "tab",
+            "row",
+            "column",
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "file_path": {
+              "type": "string"
+            },
+            "tab": {
+              "type": "string"
+            },
+            "row": {
+              "type": "integer"
+            },
+            "column": {
+              "type": "string"
+            },
+            "value": {},
+            "employee_id": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
+    "files": [
+      {
+        "path": "governance.md",
+        "content": "# Training governance\n\nReplace the placeholders below with approved HR policy before wiring\nlive tools. `logic_tools.py` must receive these values as configuration;\nthe model must never infer them.\n\n| Program | Minimum tenure days | Maximum tenure days | Mid-cycle enrollment |\n|---|---:|---:|---|\n| GM | TBD | TBD | TBD |\n| FOD | TBD | TBD | TBD |\n| OEM Parts | TBD | TBD | Hold for next cycle |\n\nHR Leadership or Director approval is required for opt-in, opt-out,\nand mid-cycle enrollment exceptions.\n"
+      },
+      {
+        "path": "trainings.md",
+        "content": "# Training curriculum baseline\n\nThis file is the tentative plan. Live Microsoft 365 calendar events\nare committed intent and take precedence during reconciliation.\n\n| Program | Session | Topic | Facilitator alias | Pre-read |\n|---|---|---|---|---|\n| GM | TBD | TBD | TBD | TBD |\n| FOD | TBD | TBD | TBD | TBD |\n| OEM Parts | TBD | TBD | TBD | TBD |\n"
+      },
+      {
+        "path": "logic_tools.py",
+        "content": "\"\"\"Deterministic training eligibility helpers.\n\nSupply approved rule values from governed configuration. Do not ask an\nLLM to calculate dates, tenure, eligibility, or completion windows.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom datetime import date\nfrom typing import Literal, TypedDict\n\n\nEligibilityStatus = Literal[\"eligible\", \"ineligible\", \"hold_next_cycle\"]\n\n\nclass EligibilityResult(TypedDict):\n    status: EligibilityStatus\n    tenure_days: int\n    reason: str\n\n\ndef compute_eligibility(\n    *,\n    start_date: date,\n    as_of_date: date,\n    minimum_tenure_days: int,\n    maximum_tenure_days: int,\n    cohort_open: bool,\n    hold_when_cohort_closed: bool,\n) -> EligibilityResult:\n    \"\"\"Apply approved numeric rules without model arithmetic.\"\"\"\n    tenure_days = (as_of_date - start_date).days\n    if tenure_days < 0:\n        return {\n            \"status\": \"ineligible\",\n            \"tenure_days\": tenure_days,\n            \"reason\": \"start_date_is_after_as_of_date\",\n        }\n    if tenure_days < minimum_tenure_days:\n        return {\n            \"status\": \"ineligible\",\n            \"tenure_days\": tenure_days,\n            \"reason\": \"below_minimum_tenure\",\n        }\n    if tenure_days > maximum_tenure_days:\n        return {\n            \"status\": \"ineligible\",\n            \"tenure_days\": tenure_days,\n            \"reason\": \"above_maximum_tenure\",\n        }\n    if not cohort_open and hold_when_cohort_closed:\n        return {\n            \"status\": \"hold_next_cycle\",\n            \"tenure_days\": tenure_days,\n            \"reason\": \"cohort_closed\",\n        }\n    return {\n        \"status\": \"eligible\",\n        \"tenure_days\": tenure_days,\n        \"reason\": \"within_approved_window\",\n    }\n"
+      }
+    ],
+    "readme_extra": "## Ingest connector choice\n\n`--ingest-source sharepoint` (default) selects\n`sharepoint_workday_export_reader`. `--ingest-source workday` selects\n`workday_new_hire_lookup`. Only the selected tool is granted to\n`tca_ingest`; both provider-neutral contracts remain in `tools/toolspec.json`.\n\n## OPA (policy-as-code)\n\nInit writes `policies/opa/data.json`, `eligibility.rego`, and\n`actions.rego`. Tenure windows and `drafts_only` live in data \u2014 edit\nthem without changing agent prompts. Wire an OPA-compatible engine\nat runtime; HITL remains `review.requires_hitl` in `graph.yaml`.\n\n## Evals\n\nCatalog `evals:` is a starter set (capability, ingest, eligibility,\nOPA, reconcile, drafts, review, tracker). It is not exhaustive.\nExpand or replace cases as requirements change; init recopies them\ninto `evals/<workflow>/app.evalset.json` and `config/app.yaml`.\n\n## Guardrails\n\nSharePoint trackers are read-only. `recommend_tracker_edit` returns an\nexact change for a coordinator to apply. Outbound Outlook and Teams tools\nproduce drafts with `requireConfirmation: true`; this scaffold contains\nno execute/send tool. The graph pauses at `review` for coordinator\napproval, and policy exceptions require HR leadership approval.\n\nCustom MCP servers, live Workday/Microsoft connectors, Gemini Enterprise\nregistration, scheduling, and Model Armor are post-scaffold design work.\n"
+  }
+}

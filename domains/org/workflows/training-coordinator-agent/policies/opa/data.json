@@ -1,0 +1,26 @@
+{
+  "training": {
+    "drafts_only": true,
+    "require_confirmation": true,
+    "tracker_writes_allowed": false,
+    "hitl_required_default": true,
+    "director_approval_for_exceptions": true,
+    "programs": {
+      "GM": {
+        "min_tenure_days": 30,
+        "max_tenure_days": 365,
+        "hold_when_cohort_closed": false
+      },
+      "FOD": {
+        "min_tenure_days": 14,
+        "max_tenure_days": 180,
+        "hold_when_cohort_closed": false
+      },
+      "OEM_Parts": {
+        "min_tenure_days": 30,
+        "max_tenure_days": 90,
+        "hold_when_cohort_closed": true
+      }
+    }
+  }
+}

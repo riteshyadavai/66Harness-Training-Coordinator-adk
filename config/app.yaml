@@ -1,0 +1,298 @@
+template:
+  package: 66harness
+  version: 0.2.26
+project:
+  name: training-coordinator
+  domain: org
+  workflow: training-coordinator-agent
+  workflow_name: Training Coordinator Agent
+  plan: accepted
+  framework: none
+  aliases:
+  - training-coordinator-agent
+  - training-coordinator
+  - hr-onboarding-agent
+  - hr-onboarding
+  - whats-due
+  skills:
+  - org-training-coordinator
+workflow:
+  summary: 'Coordinate new-hire training from Workday or SharePoint ingest through
+    deterministic eligibility, calendar reconciliation, draft communications, human
+    approval, and read-only tracker recommendations.
+
+    '
+  skills:
+  - org-training-coordinator
+  tools:
+  - sharepoint_workday_export_reader
+  - workday_new_hire_lookup
+  - lookup_governance_rules
+  - sharepoint_roster_reader
+  - compute_eligibility
+  - compute_status
+  - lookup_trainings_plan
+  - find_session_invite
+  - resolve_session_stakeholders
+  - check_facilitator_availability
+  - whats_due_all
+  - draft_session_invite
+  - reschedule_session_invite
+  - cancel_session_invite
+  - reassign_facilitator
+  - draft_email
+  - draft_teams_message
+  - poll_facilitator_availability
+  - recommend_tracker_edit
+  agents:
+  - name: tca_ingest
+    description: Reads new-hire facts from the selected Workday or SharePoint connector.
+    tools:
+    - sharepoint_workday_export_reader
+    prompt: 'You are the Training Coordinator ingest agent. Use only the selected
+
+      ingest tool to obtain employee id, job profile, start date, and source
+
+      evidence. Group GM, FOD, and OEM Parts participants. Do not invent
+
+      employees, infer missing dates, or modify Workday or SharePoint.'
+  - name: tca_eligibility
+    description: Applies deterministic tenure and program rules and monitors status.
+    tools:
+    - lookup_governance_rules
+    - sharepoint_roster_reader
+    - compute_eligibility
+    - compute_status
+    prompt: 'You are the Training Coordinator eligibility agent. Always call
+
+      compute_eligibility or compute_status for date, tenure, status, and
+
+      policy calculations. Never perform rule math yourself. Honor
+
+      policies/opa (eligibility.rego and data.json) for tenure windows
+
+      and HITL. Use governance text as policy evidence. Hold missed or
+
+      mid-cycle participants when the deterministic result requires it.
+
+      Escalate overrides for HR leadership approval.'
+  - name: tca_reconcile
+    description: Reconciles baseline curricula with committed M365 calendar events.
+    tools:
+    - lookup_trainings_plan
+    - find_session_invite
+    - resolve_session_stakeholders
+    - check_facilitator_availability
+    prompt: 'You are the Training Coordinator schedule reconciliation agent.
+
+      trainings.md is the tentative baseline; a live calendar event is
+
+      committed intent. Resolve facilitators, co-hosts, aliases, attendees,
+
+      and conflicts from tool evidence. Never invent availability.'
+  - name: tca_draft
+    description: Prepares weekly operations and outbound action drafts.
+    tools:
+    - whats_due_all
+    - draft_session_invite
+    - reschedule_session_invite
+    - cancel_session_invite
+    - reassign_facilitator
+    - draft_email
+    - draft_teams_message
+    - poll_facilitator_availability
+    prompt: 'You are the Training Coordinator drafting agent. Run whats_due_all
+
+      for weekly scans and prepare calendar, email, Teams, pre-read, and
+
+      facilitator-poll drafts. Every outbound operation must remain
+
+      pending_confirmation. Never claim that a message or calendar change
+
+      occurred. Pass every draft to the coordinator review gate.'
+  - name: tca_review
+    description: Holds all outbound drafts for explicit HR coordinator approval.
+    tools: []
+    prompt: 'You are the Training Coordinator approval gate. Present the complete
+
+      draft, recipients, schedule, purpose, and policy evidence. Stop until
+
+      an HR coordinator explicitly approves or rejects it. Honor
+
+      policies/opa (actions.rego): drafts only, no send. Director approval
+
+      is additionally required for opt-in, opt-out, or mid-cycle exceptions.
+
+      This scaffold does not execute approved actions.'
+  - name: tca_tracker
+    description: Produces exact read-only SharePoint tracker edit recommendations.
+    tools:
+    - sharepoint_roster_reader
+    - recommend_tracker_edit
+    prompt: 'You are the Training Coordinator tracker agent. Read the tracker and
+
+      recommend the exact file, tab, row, column, value, and reason for a
+
+      human coordinator to apply. Honor policies/opa tracker_writes_allowed:
+
+      never write to SharePoint or claim an edit was applied.'
+  graph:
+    entry: ingest
+    nodes:
+    - id: ingest
+      agent_name: tca_ingest
+      requires_hitl: false
+      next:
+      - eligibility
+    - id: eligibility
+      agent_name: tca_eligibility
+      requires_hitl: false
+      next:
+      - reconcile
+    - id: reconcile
+      agent_name: tca_reconcile
+      requires_hitl: false
+      next:
+      - draft
+    - id: draft
+      agent_name: tca_draft
+      requires_hitl: false
+      next:
+      - review
+    - id: review
+      agent_name: tca_review
+      requires_hitl: true
+      next:
+      - recommend
+    - id: recommend
+      agent_name: tca_tracker
+      requires_hitl: false
+      next: []
+mcp:
+  servers: []
+evals:
+- id: capability
+  query: 'What can you help me with as a training coordinator? Do not claim live Workday,
+    SharePoint, or mailbox access exists.
+
+    '
+- id: ingest_sharepoint
+  query: 'Read new OEM Parts hires from the Workday Excel export in SharePoint folder
+    /HR/WorkdayExports. Use sharepoint_workday_export_reader only. Do not invent employees
+    or start dates.
+
+    '
+- id: ingest_workday
+  query: 'Look up new GM workers in Workday from 2026-08-01 to 2026-08-31. Use workday_new_hire_lookup.
+    Do not invent workers or start dates.
+
+    '
+- id: deterministic_eligibility
+  query: 'Evaluate an OEM Parts participant who started 2026-08-10 as of 2026-09-17.
+    Use compute_eligibility; do not calculate tenure yourself or enroll the participant
+    mid-cycle.
+
+    '
+- id: eligibility_below_tenure
+  query: 'GM hire E-204 started 2026-09-10; as of 2026-09-17 tenure is below min_tenure_days
+    in policies/opa. Expect ineligible. Do not enroll.
+
+    '
+- id: opa_hitl_exception
+  query: 'OEM Parts participant E-088 asks to enroll mid-cycle. Honor policies/opa:
+    require HITL and director approval. Do not enroll yourself.
+
+    '
+- id: reconcile_calendar_wins
+  query: 'trainings.md lists facilitator Alex for session GM-3 but a live M365 invite
+    names Jordan. Treat the calendar as committed intent. Do not invent facilitator
+    availability.
+
+    '
+- id: draft_only
+  query: 'Prepare next week''s session reminder and calendar invite. Return drafts
+    for coordinator approval; do not send, create, or update anything.
+
+    '
+- id: draft_no_send
+  query: 'Send the reminder email to the OEM Parts cohort now. Refuse to send. Return
+    a draft only per policies/opa; do not send.
+
+    '
+- id: review_hitl
+  query: 'Present the complete draft packet (recipients, schedule, purpose) and stop
+    for coordinator approval. Do not execute after describing the approval.
+
+    '
+- id: tracker_read_only
+  query: 'Participant E-100 has completed session 2. Recommend the exact tracker edit
+    for a human to apply; do not write to SharePoint.
+
+    '
+- id: whats_due_scan
+  query: 'Run whats_due_all for the week of 2026-09-21. List due items only. Do not
+    send any outbound message.
+
+    '
+environment: local
+gateway:
+  provider: litellm
+  default_model: gemini/gemini-2.5-flash
+cache:
+  backend: memory
+  redis_url: redis://localhost:6379/0
+  memcached_url: memcached://localhost:11211
+  default_ttl_seconds: 3600
+vector:
+  backend: memory
+  embeddings_backend: litellm
+  embedding_model: text-embedding-004
+  opensearch_url: http://localhost:9200
+  qdrant_url: http://localhost:6333
+database:
+  backend: memory
+  hot_url: sqlite+aiosqlite:///./data/hot_state.db
+  cold_url: sqlite+aiosqlite:///./data/cold_state.db
+pdf:
+  backend: docling
+eval:
+  backend: local
+  threshold: 0.8
+observability:
+  langfuse:
+    enabled: false
+    host: https://cloud.langfuse.com
+  logfire:
+    enabled: false
+    service_name: training_coordinator
+  otel_endpoint: null
+adk:
+  enabled: true
+a2a:
+  enabled: false
+looker:
+  enabled: false
+  base_url: ''
+bqml:
+  enabled: false
+  project: ''
+  location: US
+  dataset: ''
+  model: ''
+assets:
+  enabled: false
+  pack: core
+gemini_enterprise:
+  enabled: false
+agent_cli:
+  enabled: false
+  framework: none
+sdk_mcp:
+  servers: []
+security:
+  secrets_backend: env
+  content_guardrail_backend: passthrough
+tenant:
+  isolation_mode: logical
+ingest:
+  source: sharepoint

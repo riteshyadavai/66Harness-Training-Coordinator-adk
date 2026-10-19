@@ -1,0 +1,17 @@
+name: tca_reconcile
+version: 1.0.0
+description: Reconciles baseline curricula with committed M365 calendar events.
+inputs:
+- query
+- session_id
+outputs:
+- summary
+side_effects: []
+allowed_tools:
+- lookup_trainings_plan
+- find_session_invite
+- resolve_session_stakeholders
+- check_facilitator_availability
+cost_ceiling_usd: 0.5
+timeout_seconds: 60
+prompt_version: 1.0.0

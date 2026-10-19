@@ -1,0 +1,763 @@
+{
+  "tools": [
+    {
+      "name": "sharepoint_workday_export_reader",
+      "description": "Read new-hire rows from a Workday Excel export in a designated SharePoint folder. Read-only.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "folder_path"
+        ],
+        "properties": {
+          "folder_path": {
+            "type": "string"
+          },
+          "file_name": {
+            "type": "string"
+          },
+          "job_profiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "as_of_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    {
+      "name": "workday_new_hire_lookup",
+      "description": "Query Workday for new workers by start-date window and job profile. Read-only.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "start_date_from",
+          "start_date_to"
+        ],
+        "properties": {
+          "start_date_from": {
+            "type": "string",
+            "format": "date"
+          },
+          "start_date_to": {
+            "type": "string",
+            "format": "date"
+          },
+          "job_profiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "sharepoint_roster_reader",
+      "description": "Read participant state, completion, and eligibility from a SharePoint Excel tracker. Never writes.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string"
+          },
+          "tab": {
+            "type": "string"
+          },
+          "program": {
+            "type": "string",
+            "enum": [
+              "GM",
+              "FOD",
+              "OEM_Parts"
+            ]
+          },
+          "employee_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "lookup_trainings_plan",
+      "description": "Read tentative curriculum, topics, facilitators, and pre-reads from trainings.md.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "program": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "lookup_governance_rules",
+      "description": "Read inclusion, exclusion, hold, and override rules from governance.md without calculating tenure.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "program": {
+            "type": "string"
+          },
+          "rule_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "compute_eligibility",
+      "description": "Deterministically calculate tenure and return eligible, ineligible, or hold_next_cycle.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "employee_id",
+          "job_profile",
+          "start_date",
+          "as_of_date",
+          "program"
+        ],
+        "properties": {
+          "employee_id": {
+            "type": "string"
+          },
+          "job_profile": {
+            "type": "string"
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "as_of_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "program": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "status",
+          "tenure_days",
+          "reason"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "ineligible",
+              "hold_next_cycle"
+            ]
+          },
+          "tenure_days": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "compute_status",
+      "description": "Deterministically flag stalled participants and completion-window age-outs.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "program",
+          "as_of_date"
+        ],
+        "properties": {
+          "program": {
+            "type": "string"
+          },
+          "as_of_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "employee_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "whats_due_all",
+      "description": "Scan active program rosters for upcoming sessions, communications, and overdue milestones.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "week_start"
+        ],
+        "properties": {
+          "week_start": {
+            "type": "string",
+            "format": "date"
+          },
+          "programs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "find_session_invite",
+      "description": "Find committed M365 calendar events for a training session. Read-only.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "date_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "organizer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "resolve_session_stakeholders",
+      "description": "Resolve facilitators, co-hosts, and participants from schedules and alias tables.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "program": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "check_facilitator_availability",
+      "description": "Read facilitator calendar free/busy information without sending a poll.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "facilitator_email",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "facilitator_email": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "name": "draft_session_invite",
+      "description": "Prepare an Outlook session invite draft; never sends or creates an event.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "subject",
+          "start",
+          "end",
+          "attendees"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "attendees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "facilitators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "body": {
+            "type": "string"
+          },
+          "pre_read_links": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "reschedule_session_invite",
+      "description": "Prepare a reschedule draft for an existing invite.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "invite_id",
+          "new_start",
+          "new_end",
+          "reason"
+        ],
+        "properties": {
+          "invite_id": {
+            "type": "string"
+          },
+          "new_start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "new_end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "cancel_session_invite",
+      "description": "Prepare a cancellation draft for an existing invite.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "invite_id",
+          "reason"
+        ],
+        "properties": {
+          "invite_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "reassign_facilitator",
+      "description": "Prepare a facilitator or topic reassignment draft.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "invite_id",
+          "from_email",
+          "to_email"
+        ],
+        "properties": {
+          "invite_id": {
+            "type": "string"
+          },
+          "from_email": {
+            "type": "string"
+          },
+          "to_email": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "draft_email",
+      "description": "Prepare an Outlook reminder, pre-read, or follow-up email draft.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "to",
+          "subject",
+          "body",
+          "purpose"
+        ],
+        "properties": {
+          "to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subject": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "reminder",
+              "preread",
+              "follow_up"
+            ]
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "draft_teams_message",
+      "description": "Prepare a Microsoft Teams message draft.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "channel_or_user",
+          "body"
+        ],
+        "properties": {
+          "channel_or_user": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "poll_facilitator_availability",
+      "description": "Prepare an asynchronous facilitator availability poll draft.",
+      "annotations": {
+        "readOnlyHint": false,
+        "requireConfirmation": true,
+        "destructiveHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "facilitator_emails",
+          "candidate_slots"
+        ],
+        "properties": {
+          "facilitator_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "candidate_slots": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "draft_id",
+          "status",
+          "preview"
+        ],
+        "properties": {
+          "draft_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_confirmation"
+            ]
+          },
+          "preview": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "name": "recommend_tracker_edit",
+      "description": "Recommend an exact Excel cell change for a human to apply. Never writes SharePoint.",
+      "annotations": {
+        "readOnlyHint": true,
+        "requireConfirmation": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "file_path",
+          "tab",
+          "row",
+          "column",
+          "value",
+          "reason"
+        ],
+        "properties": {
+          "file_path": {
+            "type": "string"
+          },
+          "tab": {
+            "type": "string"
+          },
+          "row": {
+            "type": "integer"
+          },
+          "column": {
+            "type": "string"
+          },
+          "value": {},
+          "employee_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

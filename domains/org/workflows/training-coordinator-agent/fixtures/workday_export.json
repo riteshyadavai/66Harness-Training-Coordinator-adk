@@ -1,0 +1,48 @@
+{
+  "source": "sharepoint",
+  "folder_path": "/HR/WorkdayExports",
+  "file_name": "new_hires_2026-09.xlsx",
+  "as_of_date": "2026-09-17",
+  "employees": [
+    {
+      "employee_id": "E-088",
+      "name": "Casey Nguyen",
+      "job_profile": "OEM Parts",
+      "program": "OEM_Parts",
+      "start_date": "2026-07-01",
+      "source_evidence": "Workday export row 4"
+    },
+    {
+      "employee_id": "E-100",
+      "name": "Morgan Lee",
+      "job_profile": "OEM Parts",
+      "program": "OEM_Parts",
+      "start_date": "2026-08-10",
+      "source_evidence": "Workday export row 5"
+    },
+    {
+      "employee_id": "E-141",
+      "name": "Priya Shah",
+      "job_profile": "OEM Parts",
+      "program": "OEM_Parts",
+      "start_date": "2026-08-10",
+      "source_evidence": "Workday export row 6"
+    },
+    {
+      "employee_id": "E-204",
+      "name": "Diego Alvarez",
+      "job_profile": "GM",
+      "program": "GM",
+      "start_date": "2026-09-10",
+      "source_evidence": "Workday export row 7"
+    },
+    {
+      "employee_id": "E-310",
+      "name": "Jamie Cole",
+      "job_profile": "FOD",
+      "program": "FOD",
+      "start_date": "2026-08-20",
+      "source_evidence": "Workday export row 8"
+    }
+  ]
+}
