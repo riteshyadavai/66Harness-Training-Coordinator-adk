@@ -7,7 +7,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-ROOT = Path(__file__).resolve().parents[2]
+def _repo_root() -> Path:
+    here = Path(__file__).resolve()
+    candidates = [Path("/app"), Path.cwd(), *here.parents]
+    for candidate in candidates:
+        if (candidate / "factories" / "adk" / "tca_graph.py").exists():
+            return candidate
+    return Path.cwd()
+
+
+ROOT = _repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

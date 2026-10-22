@@ -17,7 +17,27 @@ dev: install
 	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 adk-web: install
-	uv run adk web adk_agents
+	uv run adk web adk_agents --port 8080
+
+adk-deploy: install
+	uv run adk deploy cloud_run \
+		--project ai-ml-team-sandbox \
+		--region us-central1 \
+		--service_name tca-adk-demo \
+		--with_ui \
+		--otel_to_cloud \
+		--trace_to_cloud \
+		--app_name training_coordinator \
+		--extra_packages factories \
+		--extra_packages config \
+		--extra_packages domains \
+		--extra_packages shared \
+		--env ADK_ENABLED=true \
+		--env ADK_DEFAULT_MODEL=openrouter/openai/gpt-oss-120b \
+		adk_agents/training_coordinator \
+		-- \
+		--allow-unauthenticated \
+		--set-secrets=OPENROUTER_API_KEY=tca-openrouter-api-key:latest
 
 lint:
 	uv run ruff check app agents shared factories config tests examples cli governance

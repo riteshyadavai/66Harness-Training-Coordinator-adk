@@ -11,11 +11,11 @@ from google.adk.events.event import Event
 from google.genai import types
 from typing_extensions import override
 
-from config.settings import PROJECT_ROOT
+from factories.adk.paths import repo_root
 from factories.adk.tca_tools import function_tools_for
 
 WORKFLOW_PROMPTS = (
-    PROJECT_ROOT / "domains" / "org" / "workflows" / "training-coordinator-agent" / "prompts"
+    repo_root() / "domains" / "org" / "workflows" / "training-coordinator-agent" / "prompts"
 )
 
 AGENT_TOOLS: dict[str, list[str]] = {
@@ -70,6 +70,7 @@ to SharePoint or claim an edit was applied.
 
 APPROVE_WORDS = {"approve", "approved", "yes", "lgtm", "ok", "okay"}
 REJECT_WORDS = {"reject", "rejected", "deny", "denied", "no"}
+GREET_WORDS = {"hi", "hello", "hey", "help", "yo"}
 
 
 def _user_text(ctx: InvocationContext) -> str:
@@ -93,7 +94,27 @@ class TcaDemoRoot(BaseAgent):
 
     @override
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
-        decision = _decision(_user_text(ctx))
+        text = _user_text(ctx)
+        tokens = {t.strip(".,!?") for t in text.lower().split()}
+        if tokens <= GREET_WORDS or text.lower().strip() in GREET_WORDS:
+            yield Event(
+                author=self.name,
+                invocation_id=ctx.invocation_id,
+                content=types.Content(
+                    role="model",
+                    parts=[
+                        types.Part(
+                            text=(
+                                "I am the Field Onboarding coordinator (GM, FOD, OEM Parts). "
+                                "Ask what is due for a week, or paste a hire-export question. "
+                                "Example: What's due for GM and OEM Parts the week of 2026-09-21?"
+                            )
+                        )
+                    ],
+                ),
+            )
+            return
+        decision = _decision(text)
         children = {child.name: child for child in self.sub_agents}
         if decision == "approve":
             async for event in children["tca_tracker"].run_async(ctx):

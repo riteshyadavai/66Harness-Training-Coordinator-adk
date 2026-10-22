@@ -5,10 +5,10 @@ from __future__ import annotations
 import importlib.util
 from typing import Any
 
-from config.settings import PROJECT_ROOT
+from factories.adk.paths import repo_root
 
 MOCK_PATH = (
-    PROJECT_ROOT
+    repo_root()
     / "domains"
     / "org"
     / "workflows"

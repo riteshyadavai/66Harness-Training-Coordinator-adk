@@ -1,4 +1,5 @@
 .env
+__KEYFILE__
 .venv/
 .tools/
 .ruff_cache/
