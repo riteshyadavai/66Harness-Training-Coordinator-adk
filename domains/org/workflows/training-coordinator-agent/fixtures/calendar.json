@@ -1,39 +1,60 @@
 {
   "invites": [
     {
-      "invite_id": "INV-GM-3",
-      "session_id": "GM-3",
-      "topic": "Safety systems",
+      "invite_id": "INV-GM-5",
+      "session_id": "GM-5",
+      "topic": "DMS & Financial Management",
       "program": "GM",
-      "organizer": "training.ops@example.com",
-      "start": "2026-09-22T14:00:00",
-      "end": "2026-09-22T16:00:00",
-      "facilitators": ["jordan@example.com"],
+      "organizer": "onboarding@campingworld.com",
+      "start": "2026-09-22T11:00:00",
+      "end": "2026-09-22T12:00:00",
+      "facilitators": ["s.toomey@campingworld.com"],
+      "attendees": ["E-204"],
+      "status": "committed",
+      "note": "Committed invite. trainings.md baseline facilitator is P20 Jesse Jensen."
+    },
+    {
+      "invite_id": "INV-GM-5B",
+      "session_id": "GM-5",
+      "topic": "DMS & Financial Management",
+      "program": "GM",
+      "organizer": "onboarding@campingworld.com",
+      "start": "2026-09-24T11:00:00",
+      "end": "2026-09-24T12:00:00",
+      "facilitators": ["s.toomey@campingworld.com"],
       "attendees": ["E-204"],
       "status": "committed"
     },
     {
-      "invite_id": "INV-OEM-2",
-      "session_id": "OEM-2",
-      "topic": "Parts counter basics",
+      "invite_id": "INV-OEM-5",
+      "session_id": "OEM-5",
+      "topic": "OEM Parts Financials",
       "program": "OEM_Parts",
-      "organizer": "training.ops@example.com",
-      "start": "2026-09-24T10:00:00",
-      "end": "2026-09-24T12:00:00",
-      "facilitators": ["riley@example.com"],
+      "organizer": "onboarding@campingworld.com",
+      "start": "2026-09-22T14:30:00",
+      "end": "2026-09-22T15:30:00",
+      "facilitators": [
+        "wes.snyder@campingworld.com",
+        "lgirardi@campingworld.com",
+        "j.clark@campingworld.com"
+      ],
       "attendees": ["E-100", "E-141"],
       "status": "committed"
     },
     {
-      "invite_id": "INV-FOD-1",
-      "session_id": "FOD-1",
-      "topic": "Field ops kickoff",
-      "program": "FOD",
-      "organizer": "training.ops@example.com",
-      "start": "2026-09-23T09:00:00",
-      "end": "2026-09-23T11:00:00",
-      "facilitators": ["sam@example.com"],
-      "attendees": ["E-310"],
+      "invite_id": "INV-OEM-5B",
+      "session_id": "OEM-5",
+      "topic": "OEM Parts Financials",
+      "program": "OEM_Parts",
+      "organizer": "onboarding@campingworld.com",
+      "start": "2026-09-24T14:30:00",
+      "end": "2026-09-24T15:30:00",
+      "facilitators": [
+        "wes.snyder@campingworld.com",
+        "lgirardi@campingworld.com",
+        "j.clark@campingworld.com"
+      ],
+      "attendees": ["E-100", "E-141"],
       "status": "committed"
     }
   ]

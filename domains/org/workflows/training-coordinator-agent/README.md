@@ -7,7 +7,7 @@ Coordinate new-hire training from Workday or SharePoint ingest through determini
 ## Local ADK mock demo
 
 ```bash
-# set GOOGLE_API_KEY and ADK_ENABLED=true in .env
+# set OPENROUTER_API_KEY and ADK_ENABLED=true in .env (GOOGLE_API_KEY commented)
 uv run adk web adk_agents
 ```
 

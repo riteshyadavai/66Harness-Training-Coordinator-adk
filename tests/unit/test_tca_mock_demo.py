@@ -6,19 +6,18 @@ from factories.adk.tca_graph import AGENT_TOOLS, PIPELINE, _decision, build_root
 from factories.adk.tca_tools import load_mock_runtime
 
 
-def test_compute_eligibility_below_tenure():
+def test_compute_eligibility_oem_above_six_months():
     runtime = load_mock_runtime()
     runtime.reset_demo_state()
     result = runtime.compute_eligibility(
-        employee_id="E-204",
-        job_profile="GM",
-        start_date="2026-09-10",
+        employee_id="E-001",
+        job_profile="OEM Parts",
+        start_date="2025-01-01",
         as_of_date="2026-09-17",
-        program="GM",
+        program="OEM_Parts",
     )
     assert result["status"] == "ineligible"
-    assert result["tenure_days"] == 7
-    assert result["reason"] == "below_minimum_tenure"
+    assert result["reason"] == "above_maximum_tenure"
 
 
 def test_compute_eligibility_in_window():
@@ -64,6 +63,19 @@ def test_drafts_are_pending_confirmation_never_sent():
     assert runtime.list_drafts()[0]["draft_id"] == draft["draft_id"]
 
 
+def test_roster_reader_accepts_oem_parts_alias():
+    runtime = load_mock_runtime()
+    roster = runtime.sharepoint_roster_reader(
+        file_path="/HR/Trackers/training_roster.xlsx",
+        tab="OEM Parts",
+        employee_id="E-100",
+    )
+    assert roster["rows"]
+    assert roster["rows"][0]["employee_id"] == "E-100"
+    assert roster["rows"][0]["tab"] == "OEM_Parts"
+    assert roster["rows"][0]["row"] == 5
+
+
 def test_recommend_tracker_edit_does_not_write():
     runtime = load_mock_runtime()
     runtime.reset_demo_state()
@@ -89,9 +101,9 @@ def test_recommend_tracker_edit_does_not_write():
 
 def test_calendar_facilitator_wins_over_baseline():
     runtime = load_mock_runtime()
-    stakeholders = runtime.resolve_session_stakeholders("GM-3", program="GM")
-    assert stakeholders["calendar_facilitators"] == ["jordan@example.com"]
-    assert stakeholders["baseline_facilitator_alias"] == "Alex"
+    stakeholders = runtime.resolve_session_stakeholders("GM-5", program="GM")
+    assert stakeholders["calendar_facilitators"] == ["s.toomey@campingworld.com"]
+    assert stakeholders["baseline_facilitator_ids"] == ["P20"]
     assert stakeholders["calendar_wins"] is True
 
 

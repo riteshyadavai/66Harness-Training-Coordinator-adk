@@ -1,13 +1,31 @@
 {
   "aliases": {
-    "Alex": "alex@example.com",
-    "Jordan": "jordan@example.com",
-    "Riley": "riley@example.com",
-    "Sam": "sam@example.com"
+    "P1": "onboarding@campingworld.com",
+    "P7": "russ.hunt@campingworld.com",
+    "P8": "wes.snyder@campingworld.com",
+    "P14": "karen.lorden@campingworld.com",
+    "P15": "johnny.oh@campingworld.com",
+    "P16": "s.toomey@campingworld.com",
+    "P18": "jason.shipley@campingworld.com",
+    "P19": "jessica.cox@campingworld.com",
+    "P20": "jesse.jensen@campingworld.com",
+    "P22": "chris.eavenson@campingworld.com",
+    "P30": "lgirardi@campingworld.com",
+    "P31": "j.clark@campingworld.com"
+  },
+  "people": {
+    "P14": {"name": "Karen Lorden", "role": "GM inclusion POC"},
+    "P7": {"name": "Russ Hunt", "role": "FOD inclusion POC"},
+    "P1": {"name": "Onboarding Team Inbox", "role": "OEM inclusion / program inbox"},
+    "P20": {"name": "Jesse Jensen", "role": "GM-5 baseline facilitator"},
+    "P16": {"name": "Spencer Toomey", "role": "GM-5 committed calendar facilitator"}
   },
   "co_hosts": {
-    "GM-3": ["alex@example.com"],
-    "OEM-2": [],
-    "FOD-1": []
+    "GM-5": ["jesse.jensen@campingworld.com"],
+    "OEM-5": [
+      "wes.snyder@campingworld.com",
+      "lgirardi@campingworld.com",
+      "j.clark@campingworld.com"
+    ]
   }
 }

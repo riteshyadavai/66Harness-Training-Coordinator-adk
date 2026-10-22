@@ -35,6 +35,9 @@ _PROGRAM_ALIASES = {
     "OEM Parts": "OEM_Parts",
     "OEM_Parts": "OEM_Parts",
     "oem_parts": "OEM_Parts",
+    "oem-parts": "OEM_Parts",
+    "OEM-Parts": "OEM_Parts",
+    "oem parts": "OEM_Parts",
     "GM": "GM",
     "FOD": "FOD",
 }
@@ -153,7 +156,7 @@ def sharepoint_roster_reader(
     """Read participant state from a SharePoint Excel tracker. Never writes."""
     roster = _roster()
     tabs = roster["tabs"]
-    wanted_tab = tab or _normalize_program(program)
+    wanted_tab = _normalize_program(tab) or _normalize_program(program)
     rows: list[dict[str, Any]] = []
     for tab_name, items in tabs.items():
         if wanted_tab and tab_name != wanted_tab:
@@ -162,9 +165,27 @@ def sharepoint_roster_reader(
             if employee_id and item["employee_id"] != employee_id:
                 continue
             rows.append({**item, "tab": tab_name, "file_path": file_path or roster["file_path"]})
+    # Tab alias miss (e.g. "OEM Parts") — search all tabs by employee_id.
+    if not rows and employee_id:
+        for tab_name, items in tabs.items():
+            for item in items:
+                if item["employee_id"] == employee_id:
+                    path = file_path or roster["file_path"]
+                    rows.append({**item, "tab": tab_name, "file_path": path})
+    known_ids = [item["employee_id"] for items in tabs.values() for item in items]
     return {
         "file_path": file_path or roster["file_path"],
+        "tab_requested": tab,
+        "tab_resolved": wanted_tab,
+        "available_tabs": list(tabs.keys()),
+        "known_employee_ids": known_ids,
         "columns": roster["columns"],
+        "allowed_status_values": [
+            "pending_eligibility",
+            "active",
+            "hold_next_cycle",
+            "ineligible",
+        ],
         "rows": rows,
         "wrote": False,
     }
@@ -179,24 +200,32 @@ def lookup_trainings_plan(
     sessions = [
         {
             "program": "GM",
-            "session_id": "GM-3",
-            "topic": "Safety systems",
-            "facilitator_alias": "Alex",
-            "pre_read": "https://intranet.example/gm/safety",
+            "session_id": "GM-5",
+            "topic": "DMS & Financial Management",
+            "dates": "2026-09-22 and 2026-09-24",
+            "time": "11:00 AM–12:00 PM CST",
+            "facilitator_ids": ["P20"],
+            "backup_ids": [],
+            "tentative": True,
         },
         {
             "program": "FOD",
-            "session_id": "FOD-1",
-            "topic": "Field ops kickoff",
-            "facilitator_alias": "Sam",
-            "pre_read": "https://intranet.example/fod/kickoff",
+            "session_id": "FOD-NONE-2026-09-21",
+            "topic": None,
+            "dates": "week of 2026-09-21",
+            "time": "1:00–2:00 PM CST",
+            "facilitator_ids": [],
+            "note": "No FOD session published for this week. Do not invent one.",
+            "tentative": True,
         },
         {
             "program": "OEM_Parts",
-            "session_id": "OEM-2",
-            "topic": "Parts counter basics",
-            "facilitator_alias": "Riley",
-            "pre_read": "https://intranet.example/oem/counter",
+            "session_id": "OEM-5",
+            "topic": "OEM Parts Financials",
+            "dates": "2026-09-22 and 2026-09-24",
+            "time": "2:30–3:30 PM CST",
+            "facilitator_ids": ["P8", "P30", "P31"],
+            "tentative": True,
         },
     ]
     key = _normalize_program(program)
@@ -206,7 +235,13 @@ def lookup_trainings_plan(
         if (key is None or s["program"] == key)
         and (session_id is None or s["session_id"] == session_id)
     ]
-    return {"baseline": "trainings.md", "sessions": filtered, "source_text_excerpt": text[:400]}
+    return {
+        "baseline": "trainings.md",
+        "calendar_wins": True,
+        "sessions": filtered,
+        "people_directory_excerpt": "IDs only; resolve names from trainings.md People Directory",
+        "source_text_excerpt": text[:800],
+    }
 
 
 def lookup_governance_rules(
@@ -216,22 +251,35 @@ def lookup_governance_rules(
     """Read inclusion, exclusion, hold, and override rules. No tenure math."""
     text = (WORKFLOW_DIR / "governance.md").read_text(encoding="utf-8")
     rules = [
-        {"rule_id": "GM-TENURE", "program": "GM", "text": "GM tenure window 30–365 days"},
-        {"rule_id": "FOD-TENURE", "program": "FOD", "text": "FOD tenure window 14–180 days"},
         {
-            "rule_id": "OEM-TENURE",
-            "program": "OEM_Parts",
-            "text": "OEM Parts tenure window 30–90 days",
+            "rule_id": "EVENT-HITL",
+            "program": None,
+            "text": "New hire from Workday export is event-based; hold for inclusion POC",
+        },
+        {
+            "rule_id": "GM-INCLUSION",
+            "program": "GM",
+            "text": "GM inclusion POC is P14 Karen Lorden. Rolling 6-session cycle.",
+        },
+        {
+            "rule_id": "FOD-INCLUSION",
+            "program": "FOD",
+            "text": "FOD inclusion POC is P7 Russ Hunt. Hired 2025-01-01+.",
         },
         {
             "rule_id": "OEM-HOLD",
             "program": "OEM_Parts",
-            "text": "Hold missed or mid-cycle OEM Parts when the cohort is closed",
+            "text": "OEM Parts: last 6 months; no mid-cycle join. POC P1.",
         },
         {
-            "rule_id": "HITL-EXCEPTION",
+            "rule_id": "DRAFTS-ONLY",
             "program": None,
-            "text": "Director approval required for opt-in, opt-out, mid-cycle",
+            "text": "Use approved templates. This scaffold drafts only; never send.",
+        },
+        {
+            "rule_id": "ESCALATE",
+            "program": None,
+            "text": "Escalate unclear inclusion or wrong-recipient risk to P1",
         },
     ]
     key = _normalize_program(program)
@@ -371,8 +419,10 @@ def resolve_session_stakeholders(session_id: str, program: str | None = None) ->
     return {
         "session_id": session_id,
         "calendar_facilitators": invite["facilitators"] if invite else [],
-        "baseline_facilitator_alias": baseline.get("facilitator_alias"),
-        "baseline_facilitator_email": aliases["aliases"].get(baseline.get("facilitator_alias", "")),
+        "baseline_facilitator_ids": baseline.get("facilitator_ids"),
+        "baseline_facilitator_emails": [
+            aliases["aliases"].get(pid) for pid in baseline.get("facilitator_ids") or []
+        ],
         "co_hosts": aliases["co_hosts"].get(session_id, []),
         "attendees": invite["attendees"] if invite else [],
         "calendar_wins": True,

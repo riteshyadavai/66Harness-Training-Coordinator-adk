@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
 
 from google.adk.agents import BaseAgent, LlmAgent
@@ -124,7 +125,7 @@ def _prompt(name: str) -> str:
     return (WORKFLOW_PROMPTS / f"{name}_1.0.0.md").read_text(encoding="utf-8")
 
 
-def _make_llm_agent(name: str, model: str, extra: str = "") -> LlmAgent:
+def _make_llm_agent(name: str, model, extra: str = "") -> LlmAgent:
     instruction = _prompt(name)
     if extra:
         instruction = f"{instruction}\n{extra}"
@@ -140,14 +141,24 @@ def _make_llm_agent(name: str, model: str, extra: str = "") -> LlmAgent:
     return LlmAgent(**kwargs)
 
 
-def _model_name(model: str | None = None) -> str:
-    import os
+def _adk_model(model=None):
+    if model is not None:
+        return model
+    if os.getenv("OPENROUTER_API_KEY"):
+        from google.adk.models.lite_llm import LiteLlm
 
-    return model or os.getenv("ADK_DEFAULT_MODEL", "gemini-2.5-flash")
+        return LiteLlm(
+            model=os.getenv("ADK_DEFAULT_MODEL", "openrouter/openai/gpt-oss-120b"),
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            # LiteLLM 1.106.0 imports mcp.types.CacheableResult on any tools=
+            # call; mcp 1.x does not export it. Skip the proxy MCP gateway.
+            _skip_mcp_handler=True,
+        )
+    return os.getenv("ADK_DEFAULT_MODEL", "gemini-2.5-flash")
 
 
-def build_root_agent(model: str | None = None) -> TcaDemoRoot:
-    resolved = _model_name(model)
+def build_root_agent(model=None) -> TcaDemoRoot:
+    resolved = _adk_model(model)
     sub_agents = [
         _make_llm_agent(name, resolved, extra=REVIEW_EXTRA if name == "tca_review" else "")
         for name in PIPELINE
@@ -163,8 +174,8 @@ def build_root_agent(model: str | None = None) -> TcaDemoRoot:
     )
 
 
-def build_tca_agents(model: str | None = None) -> dict[str, LlmAgent]:
-    resolved = _model_name(model)
+def build_tca_agents(model=None) -> dict[str, LlmAgent]:
+    resolved = _adk_model(model)
     agents = {name: _make_llm_agent(name, resolved) for name in PIPELINE}
     agents["tca_tracker"] = _make_llm_agent("tca_tracker", resolved, extra=TRACKER_EXTRA)
     return agents
