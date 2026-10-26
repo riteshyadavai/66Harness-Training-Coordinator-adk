@@ -37,6 +37,11 @@ adk-deploy: install
 		adk_agents/training_coordinator \
 		-- \
 		--allow-unauthenticated \
+		--cpu=2 \
+		--memory=2Gi \
+		--timeout=600 \
+		--min-instances=1 \
+		--no-cpu-throttling \
 		--set-secrets=OPENROUTER_API_KEY=tca-openrouter-api-key:latest
 
 lint:

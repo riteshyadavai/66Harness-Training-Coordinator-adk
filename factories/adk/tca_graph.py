@@ -56,6 +56,15 @@ DESCRIPTIONS = {
     "tca_tracker": "Recommends exact tracker cell edits. Never writes.",
 }
 
+GLOBAL_RULES = """
+HARD RULES (never skip):
+- Use mock tools only.
+- Do not invent employees, names, emails, sessions, or dates.
+- Follow governance.md.
+- Call each assigned tool at most once, then hand off in under 12 lines.
+- Do not send mail or write SharePoint.
+"""
+
 REVIEW_EXTRA = """
 This is a local mock demo. Tools return fixture data only.
 
@@ -67,6 +76,15 @@ TRACKER_EXTRA = """
 The coordinator already approved. Recommend tracker edits only. Never write
 to SharePoint or claim an edit was applied.
 """
+
+WELCOME_MESSAGE = """Welcome — Field Onboarding Training Coordinator (GM, FOD, OEM Parts).
+
+I use mock tools only. I do not invent employees. I follow governance.md.
+
+Nothing is sent and SharePoint is never written. After a weekly packet, reply approve or reject.
+
+Try:
+What's due for GM and OEM Parts the week of 2026-09-21? Use mock tools only. Do not invent employees. Follow governance.md."""
 
 APPROVE_WORDS = {"approve", "approved", "yes", "lgtm", "ok", "okay"}
 REJECT_WORDS = {"reject", "rejected", "deny", "denied", "no"}
@@ -89,28 +107,29 @@ def _decision(text: str) -> str | None:
     return None
 
 
+def _is_greeting(text: str) -> bool:
+    lowered = text.lower().strip()
+    if not lowered:
+        return True
+    if lowered in GREET_WORDS:
+        return True
+    tokens = {t.strip(".,!?") for t in lowered.split()}
+    return bool(tokens) and tokens <= GREET_WORDS
+
+
 class TcaDemoRoot(BaseAgent):
     """Runs ingest→review, then tracker only after a chat approval."""
 
     @override
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
         text = _user_text(ctx)
-        tokens = {t.strip(".,!?") for t in text.lower().split()}
-        if tokens <= GREET_WORDS or text.lower().strip() in GREET_WORDS:
+        if _is_greeting(text):
             yield Event(
                 author=self.name,
                 invocation_id=ctx.invocation_id,
                 content=types.Content(
                     role="model",
-                    parts=[
-                        types.Part(
-                            text=(
-                                "I am the Field Onboarding coordinator (GM, FOD, OEM Parts). "
-                                "Ask what is due for a week, or paste a hire-export question. "
-                                "Example: What's due for GM and OEM Parts the week of 2026-09-21?"
-                            )
-                        )
-                    ],
+                    parts=[types.Part(text=WELCOME_MESSAGE)],
                 ),
             )
             return
@@ -147,7 +166,7 @@ def _prompt(name: str) -> str:
 
 
 def _make_llm_agent(name: str, model, extra: str = "") -> LlmAgent:
-    instruction = _prompt(name)
+    instruction = f"{GLOBAL_RULES}\n{_prompt(name)}"
     if extra:
         instruction = f"{instruction}\n{extra}"
     kwargs: dict = {
@@ -155,6 +174,13 @@ def _make_llm_agent(name: str, model, extra: str = "") -> LlmAgent:
         "model": model,
         "description": DESCRIPTIONS[name],
         "instruction": instruction,
+        "global_instruction": GLOBAL_RULES,
+        "disallow_transfer_to_parent": True,
+        "disallow_transfer_to_peers": True,
+        "generate_content_config": types.GenerateContentConfig(
+            temperature=0,
+            max_output_tokens=768,
+        ),
     }
     tools = function_tools_for(AGENT_TOOLS[name])
     if tools:
@@ -174,6 +200,8 @@ def _adk_model(model=None):
             # LiteLLM 1.106.0 imports mcp.types.CacheableResult on any tools=
             # call; mcp 1.x does not export it. Skip the proxy MCP gateway.
             _skip_mcp_handler=True,
+            timeout=45,
+            num_retries=1,
         )
     return os.getenv("ADK_DEFAULT_MODEL", "gemini-2.5-flash")
 

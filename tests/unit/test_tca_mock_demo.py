@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from factories.adk.tca_graph import AGENT_TOOLS, PIPELINE, _decision, build_root_agent
+from factories.adk.tca_graph import (
+    AGENT_TOOLS,
+    GLOBAL_RULES,
+    PIPELINE,
+    WELCOME_MESSAGE,
+    _decision,
+    _is_greeting,
+    build_root_agent,
+)
 from factories.adk.tca_tools import load_mock_runtime
 
 
@@ -121,3 +129,18 @@ def test_hitl_decision_words():
     assert _decision("Please approve the packet") == "approve"
     assert _decision("reject these drafts") == "reject"
     assert _decision("What's due this week?") is None
+
+
+def test_greeting_and_global_rules():
+    assert _is_greeting("")
+    assert _is_greeting("hi")
+    assert not _is_greeting(
+        "What's due for GM and OEM Parts the week of 2026-09-21?"
+    )
+    assert "Use mock tools only" in WELCOME_MESSAGE
+    assert "Do not invent employees" in WELCOME_MESSAGE
+    assert "Follow governance.md" in WELCOME_MESSAGE
+    root = build_root_agent()
+    for child in root.sub_agents:
+        assert GLOBAL_RULES in child.instruction
+        assert "Use mock tools only" in child.instruction

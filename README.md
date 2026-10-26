@@ -10,8 +10,11 @@ https://tca-adk-demo-741027775203.us-central1.run.app/dev-ui/
 
 1. Open the link.
 2. Select **training_coordinator**.
-3. Paste query 1 below.
-4. When review stops, type `approve` or `reject`.
+3. Send `hi` for the welcome (rules: mock tools only, do not invent employees, follow governance.md).
+4. Paste query 1 below. The agents already enforce those rules even if you omit them.
+5. When review stops, type `approve` or `reject`.
+
+The service stays warm (`min-instances=1`, 2 CPU). A full weekly packet still takes a few OpenRouter steps; `hi` should return immediately.
 
 OpenRouter key lives in Secret Manager (`tca-openrouter-api-key`), not in git.
 
